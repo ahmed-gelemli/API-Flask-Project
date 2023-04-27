@@ -1,0 +1,218 @@
+openapi: 3.0.0
+info:
+  title: Students API
+  description: Practice CRUD operations using a simple API.
+  version: 1.0.0
+tags:
+  - name: Hello Controller
+    description: API endpoints for the Hello Controller
+  - name: Student Controller
+    description: API endpoints for the Student Controller
+servers:
+  - url: http://127.0.0.1:5000
+paths:
+  /api/hello:
+    get:
+      tags:
+        - Hello Controller
+      summary: Returns a hello message
+      responses:
+        '200':
+          description: A hello message
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/students:
+    get:
+      tags:
+        - Student Controller
+      summary: Get all Students
+      responses:
+        '200':
+          description: A list of Students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+    post:
+      tags:
+        - Student Controller
+      summary: Add a new Student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInput'
+      responses:
+        '200':
+          description: Student added successfully
+        '400':
+          description: Incomplete JSON data
+  /api/students/{studentID}:
+    get:
+      tags:
+        - Student Controller
+      summary: Get a Student by ID
+      parameters:
+        - in: path
+          name: studentID
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: A Student object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+        '404':
+          description: Student not found
+    put:
+      tags:
+        - Student Controller
+      summary: Update a Student by ID
+      parameters:
+        - in: path
+          name: studentID
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInput'
+      responses:
+        '200':
+          description: Student updated successfully
+        '400':
+          description: Incomplete JSON data
+        '404':
+          description: Student not found
+    patch:
+      tags:
+        - Student Controller
+      summary: Partially update a Student by ID
+      parameters:
+        - in: path
+          name: studentID
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentPartialInput'
+      responses:
+        '200':
+          description: Student partially updated successfully
+        '404':
+          description: Student not found
+    delete:
+      tags:
+        - Student Controller
+      summary: Delete a Student by ID
+      parameters:
+        - in: path
+          name: studentID
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Student deleted successfully
+        '404':
+          description: Student not found
+  /api/students/search:
+    get:
+      tags:
+        - Student Controller
+      summary: Search Students by name and/or gender
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentSearchInput'
+      responses:
+        '200':
+          description: A list of matching Students
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentSearchResult'
+        '400':
+          description: Please provide at least one search parameter
+
+components:
+  schemas:
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: integer
+        gender:
+          type: string
+    StudentInput:
+      type: object
+      required:
+        - name
+        - phone
+        - gender
+      properties:
+        name:
+          type: string
+        phone:
+          type: integer
+        gender:
+          type: string
+    StudentPartialInput:
+      type: object
+      properties:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    StudentSearchInput:
+      type: object
+      properties:
+        name:
+          type: string
+        gender:
+          type: string
+    StudentSearchResult:
+      type: object
+      properties:
+        count:
+          type: integer
+        students:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              phone:
+                type: integer
+              gender:
+                type: string

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>All Students</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/dataTables.jqueryui.min.css" />
+	<script src="https://kit.fontawesome.com/cb80f674b8.js" crossorigin="anonymous"></script>
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.min.js"
+		integrity="sha384-Y4oOpwW3duJdCWv5ly8SCFYWqFDsfob/3GkgExXKV4idmbt98QcxXYs9UoXAB7BZ"
+		crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/faviconMain-32x32.png') }}">
+	
+
+</head>
+
+<body>
+	<nav class="navbar bg-light px-4">
+		<div class="container-fluid">
+			<a class="navbar-brand">Student</a>
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="/">Home</a>
+				</li>
+			</ul>
+			<span class="navbar-text">
+				Total: {{ students|length }}
+			</span>
+		</div>
+	</nav>
+
+	<div class="container my-3">
+		<div class="row">
+			<div class="d-grid gap-3 p-0">
+				{% if students|length == 0 %}
+				<h2>No record found!!</h2>
+				{% endif %}
+
+				<a href="/students/addNew" class="btn btn-primary" role="button"><i class="fas fa-user"></i> Add
+					Student</a>
+
+				<form class="row g-3 shadow p-3 bg-body rounded m-0 mb-4">
+					<h2>Search Student:</h2>
+					<div class="col-md-6">
+						<label for="name" class="form-label">Name:</label>
+						<input id="name" type="text" class="form-control">
+					</div>
+					<div class="col-md-4">
+						<label for="gender" class="form-label">Gender:</label>
+						<select id="gender" class="form-select">
+							<option value="" selected>...</option>
+							<option value="Male">Male</option>
+							<option value="Female">Female</option>
+						</select>
+					</div>
+
+					<div class="col-12">
+						<button type="button" id="search" class="btn btn-primary"
+							onclick="filterTableButton()">Search</button>
+						<button type="reset" id="clear" class="btn" onclick="resetList()">Clear</button>
+					</div>
+				</form>
+
+			</div>
+			<table id="myTable" class="table table-striped table-responsive table-hover border">
+				<caption id="caption">List of All Students</caption>
+				<thead class="thead-dark">
+					<tr>
+						<th>ID</th>
+						<th>Name</th>
+						<th>Phone</th>
+						<th>Gender</th>
+						<th>View</th>
+						<th>Edit</th>
+						<th>Delete</th>
+					</tr>
+				</thead>
+
+				<tbody>
+					{% for student in students %}
+					<tr>
+						<td>{{ student.id }}</td>
+						<td>{{ student.name }}</td>
+						<td>{{ student.phone }}</td>
+						<td><span>{{ student.gender }}</span></td>
+						<td>
+							<a href="/students/{{ student.id }}" class="btn btn-primary"> <i
+									class="fas fa-user-tag"></i></a>
+						</td>
+						<td>
+							<a href="/students/edit/{{ student.id }}" class="btn btn-warning"> <i
+									class="fas fa-user-plus text-light"></i></a>
+						</td>
+						<td>
+							<a onclick="deleteStudent('{{ student.id }}');" class="btn btn-primary btn-danger"> <i
+									class="fas fa-user-slash"></i></a>
+						</td>
+
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<footer style="background-color: #f8f9fa; padding: 1rem 0;">
+        <div class="container">
+            <p class="text-center mb-0">All rights reserved &copy; 2023</p>
+            <p class="text-center small">If you have any questions or need assistance, don't hesitate to <a
+                    href="mailto:trig-duo.07@icloud.com">reach out to the developer:</a>. <br>
+				Developed by <span class="text-success">Ahmad</span></p>
+        </div>
+    </footer>
+
+	<script>
+		function resetList() {
+			document.querySelector("#name").value = "";
+			document.querySelector("#gender").value = "";
+			filterTableButton();
+		}
+
+		function filterTableButton() {
+			var rows = document.querySelector("#myTable tbody").rows;
+			var name = document.querySelector("#name").value.toUpperCase().trim();
+			var gender = document.querySelector("#gender").value.toUpperCase().trim();
+			var count = 0;
+
+			for (var i = 0; i < rows.length; i++) {
+				var firstCol = rows[i].cells[1].textContent.toUpperCase().trim();
+				var secondCol = rows[i].cells[3].textContent.toUpperCase().trim();
+
+				if (firstCol.indexOf(name) > -1 && secondCol.indexOf(gender) == 0) {
+					rows[i].style.display = "";
+					count++;
+				} else {
+					rows[i].style.display = "none";
+				}
+			}
+
+			document.getElementById("caption").innerHTML = "Total returned: " + count;
+		}
+
+		function deleteStudent(studentID) {
+			$.ajax({
+				url: '/api/students/' + studentID,
+				method: 'DELETE',
+				contentType: 'application/json',
+				success: function (response) {
+					console.log(response);
+					location.reload();
+				},
+				error: function (error) {
+					console.log(error);
+				}
+			});
+		}
+
+	</script>
+</body>
+
+</html>
