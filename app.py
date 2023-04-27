@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, redirect, render_template, request, Response, url_for
 from flask_sqlalchemy import SQLAlchemy
-from markupsafe import escape
+import time
 import json
 
 app = Flask(__name__)
@@ -12,14 +12,18 @@ class Students(db.Model):
     name = db.Column(db.String(18), nullable=False)
     phone = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(10), nullable=False)
+    created = db.Column(db.Integer, nullable=False)
+    modified = db.Column(db.Integer)
 
-    def __init__(self, name, phone, gender):
+    def __init__(self, name, phone, gender, created, modified):
         self.name = name
         self.phone = phone
         self.gender = gender
+        self.created = created
+        self.modified = modified
 
     def __repr__(self):
-        return f"<Item {self.name}>"
+        return f"<Student {self.name}>"
     
 def validate_data(data):
     name = data.get('name')
@@ -53,6 +57,8 @@ def showAllStudents():
         student_dict['name'] = student.name
         student_dict['phone'] = student.phone
         student_dict['gender'] = student.gender
+        student_dict['created'] = student.created
+        student_dict['modified'] = student.modified
         students_list.append(student_dict)
     studentJSON = json.dumps(students_list)
     return Response(studentJSON, content_type='application/json', status=200)
@@ -72,7 +78,7 @@ def newStudent():
 
     if validate_data({'name':name, 'phone':phone, 'gender':gender}):
         # Create a new Student object and add it to the database
-        new_student = Students(name=name, phone=phone, gender=gender)
+        new_student = Students(name=name, phone=phone, gender=gender, created=time.time(), modified=time.time())
         db.session.add(new_student)
         db.session.commit()
 
@@ -91,7 +97,9 @@ def getStudent(studentID):
             'id': student.id,
             'name': student.name,
             'phone': student.phone,
-            'gender': student.gender
+            'gender': student.gender,
+            'created': student.created,
+            'modified': student.modified
         }
         return Response(json.dumps(student_dict), content_type='application/json')
     else:
@@ -120,7 +128,8 @@ def updateStudent(studentID):
     student.name = student_data['name']
     student.phone = student_data['phone']
     student.gender = student_data['gender']
-    
+    student.modified = time.time()
+
     if validate_data({'name':student_data['name'], 'phone':student_data['phone'], 'gender':student_data['gender']}):
         # Commit the changes to the database
         db.session.commit()
@@ -171,6 +180,8 @@ def updateStudentPartially(studentID):
             student.phone = student_data['phone']
         if 'gender' in student_data:
             student.gender = student_data['gender']
+        
+        student.modified = time.time()
 
         # Commit the changes to the database
         db.session.commit()
@@ -209,7 +220,9 @@ def searchStudents():
             'id': student.id,
             'name': student.name,
             'phone': student.phone,
-            'gender': student.gender
+            'gender': student.gender,
+            'created': student.created,
+            'modified': student.modified
         }
         students_list.append(student_dict)
 
@@ -237,13 +250,8 @@ def viewStudent(studentID):
     student = Students.query.get(studentID)
 
     if student:
-        # Convert the Student object to a dictionary
-        student_dict = {
-            'id': student.id,
-            'name': student.name,
-            'phone': student.phone,
-            'gender': student.gender
-        }
+        student.created = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(student.created))
+        student.modified = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(student.modified))
         return render_template('viewStudent.html', student=student)
     else:
         return Response(json.dumps({'error': 'Student not found'}), content_type='application/json', status=404)
@@ -253,13 +261,7 @@ def viewEditStudent(studentID):
     student = Students.query.get(studentID)
 
     if student:
-        # Convert the Student object to a dictionary
-        student_dict = {
-            'id': student.id,
-            'name': student.name,
-            'phone': student.phone,
-            'gender': student.gender
-        }
+        student.modified = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime(student.modified))
         return render_template('editStudent.html', student=student)
     else:
         return Response(json.dumps({'error': 'Student not found'}), content_type='application/json', status=404)    

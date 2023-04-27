@@ -36,7 +36,20 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Student'
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    phone:
+                      type: integer
+                    gender:
+                      type: string
+                    created:
+                      type: integer
+                    modified:
+                      type: integer
     post:
       tags:
         - Student Controller
@@ -46,7 +59,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInput'
+              type: object
+              required:
+                - name
+                - phone
+                - gender
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: integer
+                gender:
+                  type: string
       responses:
         '200':
           description: Student added successfully
@@ -69,7 +93,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Student'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  phone:
+                    type: integer
+                  gender:
+                    type: string
+                  created:
+                    type: integer
+                  modified:
+                    type: integer
         '404':
           description: Student not found
     put:
@@ -87,7 +124,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentInput'
+              type: object
+              required:
+                - name
+                - phone
+                - gender
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: integer
+                gender:
+                  type: string
       responses:
         '200':
           description: Student updated successfully
@@ -110,10 +158,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentPartialInput'
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: integer
+                gender:
+                  type: string
       responses:
         '200':
-          description: Student partially updated successfully
+           description: Student partially updated successfully
         '404':
           description: Student not found
     delete:
@@ -132,25 +187,50 @@ paths:
         '404':
           description: Student not found
   /api/students/search:
-    get:
-      tags:
-        - Student Controller
-      summary: Search Students by name and/or gender
-      requestBody:
-        required: true
+  get:
+    tags:
+      - Student Controller
+    summary: Search Students by name and/or gender
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+              gender:
+                type: string
+    responses:
+      '200':
+        description: A list of matching Students
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StudentSearchInput'
-      responses:
-        '200':
-          description: A list of matching Students
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudentSearchResult'
-        '400':
-          description: Please provide at least one search parameter
+              type: object
+              properties:
+                count:
+                  type: integer
+                students:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      phone:
+                        type: integer
+                      gender:
+                        type: string
+                      created:
+                        type: integer
+                      modified:
+                        type: integer
+      '400':
+        description: Please provide at least one search parameter
 
 components:
   schemas:
@@ -165,6 +245,10 @@ components:
           type: integer
         gender:
           type: string
+        created:
+          type: integer
+        modified:
+          type: integer
     StudentInput:
       type: object
       required:
@@ -178,9 +262,6 @@ components:
           type: integer
         gender:
           type: string
-    StudentPartialInput:
-      type: object
-      properties:
     SuccessResponse:
       type: object
       properties:
@@ -191,28 +272,3 @@ components:
       properties:
         error:
           type: string
-    StudentSearchInput:
-      type: object
-      properties:
-        name:
-          type: string
-        gender:
-          type: string
-    StudentSearchResult:
-      type: object
-      properties:
-        count:
-          type: integer
-        students:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: integer
-              name:
-                type: string
-              phone:
-                type: integer
-              gender:
-                type: string

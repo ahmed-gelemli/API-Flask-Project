@@ -45,7 +45,7 @@
             </div>
             <div class="col-12">
                 <select id="gender" class="form-select"">
-                    <option value=" Male">Male</option>
+                    <option value="Male">Male</option>
                     <option value="Female">Female</option>
                 </select>
             </div>
@@ -54,7 +54,6 @@
     </div>
 
     <script>
-        document.getElementById("gender").value = "{{ student.gender }}";
 
         const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
         const showAlert = (message, type) => {
@@ -70,23 +69,26 @@
         }
 
         $(document).ready(function () {
+            document.getElementById("gender").value = "{{ student.gender }}";
+
             $('#submit').click(function () {
                 var name = $('#name').val();
                 var phone = $('#phone').val();
                 var gender = $('#gender').val();
 
                 if (name.length < 2 || name.length > 16) {
-                    alert('Name should be between 2 and 16 characters');
+                    showAlert('Name should be between 2 and 16 characters');
                     return false;
                 }
 
                 if (isNaN(phone)) {
-                    alert('Phone must be an integer');
+                    showAlert('Phone must be an integer');
                     return false;
                 }
 
                 if (gender !== 'Male' && gender !== 'Female') {
-                    alert('Gender must be either Male or Female');
+                    showAlert('Gender must be either Male or Female', 'danger');
+                    console.log(gender);
                     return false;
                 }
 
