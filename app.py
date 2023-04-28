@@ -4,7 +4,7 @@ import time
 import json
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mydb.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@0.0.0.0:5432/postgres'
 db = SQLAlchemy(app)
 
 class Students(db.Model):
@@ -49,7 +49,7 @@ def helloController():
 @app.get('/api/students')
 def showAllStudents():
     # I will provide whole Student JSON
-    students = Students.query.all()
+    students = Students.query.order_by(Students.id.asc()).all()
     students_list = []
     for student in students:
         student_dict = {}
@@ -238,7 +238,7 @@ def searchStudents():
 # For WebView
 @app.route('/view')
 def webviewLand():
-    students = Students.query.all()
+    students = Students.query.order_by(Students.id.asc()).all()
     return render_template('webview.html', students=students)
 
 @app.route('/students/addNew')
