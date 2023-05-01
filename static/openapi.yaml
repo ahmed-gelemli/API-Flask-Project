@@ -9,7 +9,7 @@ tags:
   - name: Student Controller
     description: API endpoints for the Student Controller
 servers:
-  - url: http://127.0.0.1:5000
+  - url: 
 paths:
   /api/hello:
     get:

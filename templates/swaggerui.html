@@ -27,6 +27,7 @@
   </style>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon-32x32.png') }}" sizes="32x32" />
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon-16x16.png') }}" sizes="16x16" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 </head>
 
 <body>
@@ -37,11 +38,32 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const ui = SwaggerUIBundle({
-        url: "{{ url_for('static', filename='openapi.yaml') }}",
-        dom_id: "#swagger-ui",
-        tryItOutEnabled: false,
-      });
+      // Fetch the OpenAPI definition
+      fetch("{{ url_for('static', filename='openapi.yaml') }}")
+        .then(response => response.text())
+        .then(yaml => {
+          const openapiDefinition = jsyaml.load(yaml);
+
+          // Add servers to the OpenAPI definition
+          openapiDefinition.servers = [
+            {
+              url: "http://" + window.location.hostname,
+            }
+          ];
+
+          console.log(openapiDefinition)
+
+          // Initialize Swagger UI
+          const ui = SwaggerUIBundle({
+            spec: openapiDefinition,
+            dom_id: "#swagger-ui",
+            tryItOutEnabled: false,
+          });
+        })
+        .catch(error => {
+          console.error('Error loading the OpenAPI definition:', error);
+        });
+
     });
   </script>
 
