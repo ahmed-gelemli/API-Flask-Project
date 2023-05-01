@@ -14,7 +14,7 @@ You'll need the following installed on your system to run this app:
 To install the required Python dependencies, run the following command:
 
 ```bash
-pip install Flask Flask-SQLAlchemy psycopg2
+pip install Flask Flask-SQLAlchemy psycopg2 flask-cors
 ```
 
 ## Database Setup

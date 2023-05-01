@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, redirect, render_template, request, Response, url_for
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import time
 import json
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"*": {"origins": "*"}})
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@0.0.0.0:5432/postgres'
 db = SQLAlchemy(app)
 
