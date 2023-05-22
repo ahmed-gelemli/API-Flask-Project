@@ -113,7 +113,6 @@ def getStudent(studentID):
 def updateStudent(studentID):
     # Get JSON data from the request
     student_data = request.get_json()
-    print("hello")
 
     # Check if the JSON data contains all the required fields
     if 'name' not in student_data or 'phone' not in student_data or 'gender' not in student_data:
