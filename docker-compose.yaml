@@ -1,44 +1,48 @@
-version: '3.8'  
-  
-services:  
-  web:  
-    build: .  
-    ports:  
-      - "5000:5000"  
-    environment:  
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/students_db  
-    depends_on:  
-      - db  
-    volumes:  
-      - .:/app  
-    restart: always  
-  
-  db:  
-    image: postgres:13  
-    volumes:  
-      - postgres_data:/var/lib/postgresql/data  
-    environment:  
-      - POSTGRES_PASSWORD=postgres  
-      - POSTGRES_USER=postgres  
-      - POSTGRES_DB=students_db  
-    ports:  
-      - "5432:5432"  
-    restart: always  
-      
-  db_init:  
-    image: postgres:13  
-    depends_on:  
-      - db  
-    command: >  
-      bash -c "sleep 5 && PGPASSWORD=postgres psql -h db -U postgres -d students_db -c '  
-      CREATE TABLE IF NOT EXISTS students (  
-        id SERIAL PRIMARY KEY,  
-        name VARCHAR(18) NOT NULL,  
-        phone INTEGER NOT NULL,  
-        gender VARCHAR(10) NOT NULL,  
-        created INTEGER NOT NULL,  
-        modified INTEGER  
-      );'"  
-  
-volumes:  
+# /srv/projects/students-api/docker-compose.yml
+services:
+  web:
+    build: .
+    container_name: students-api
+    restart: unless-stopped
+    depends_on: [ db ]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/students_db
+    ports:
+      - "127.0.0.1:5001:5000"      # ⬅︎ host-only, unique host port
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    # remove volume bind unless you need live-code reload
+    # volumes: [ .:/app ]
+
+  db:
+    image: postgres:13
+    container_name: students-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB:       students_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # do NOT publish 5432 publicly; the web service talks over docker network
+    # ports: [ "5432:5432" ]
+
+  db_init:
+    image: postgres:13
+    depends_on: [ db ]
+    command: >
+      bash -c "sleep 5 &&
+               PGPASSWORD=postgres psql -h db -U postgres -d students_db -c
+               \"CREATE TABLE IF NOT EXISTS students (
+                  id SERIAL PRIMARY KEY,
+                  name VARCHAR(18) NOT NULL,
+                  phone INTEGER NOT NULL,
+                  gender VARCHAR(10) NOT NULL,
+                  created INTEGER NOT NULL,
+                  modified INTEGER
+               );\""
+volumes:
   postgres_data:
