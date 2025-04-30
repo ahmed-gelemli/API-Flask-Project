@@ -1,0 +1,44 @@
+version: '3.8'  
+  
+services:  
+  web:  
+    build: .  
+    ports:  
+      - "5000:5000"  
+    environment:  
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/students_db  
+    depends_on:  
+      - db  
+    volumes:  
+      - .:/app  
+    restart: always  
+  
+  db:  
+    image: postgres:13  
+    volumes:  
+      - postgres_data:/var/lib/postgresql/data  
+    environment:  
+      - POSTGRES_PASSWORD=postgres  
+      - POSTGRES_USER=postgres  
+      - POSTGRES_DB=students_db  
+    ports:  
+      - "5432:5432"  
+    restart: always  
+      
+  db_init:  
+    image: postgres:13  
+    depends_on:  
+      - db  
+    command: >  
+      bash -c "sleep 5 && PGPASSWORD=postgres psql -h db -U postgres -d students_db -c '  
+      CREATE TABLE IF NOT EXISTS students (  
+        id SERIAL PRIMARY KEY,  
+        name VARCHAR(18) NOT NULL,  
+        phone INTEGER NOT NULL,  
+        gender VARCHAR(10) NOT NULL,  
+        created INTEGER NOT NULL,  
+        modified INTEGER  
+      );'"  
+  
+volumes:  
+  postgres_data:

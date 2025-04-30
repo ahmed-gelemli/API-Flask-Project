@@ -3,11 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import time
 import json
+import os
 
 app = Flask(__name__)
 cors = CORS(app, resources={r"*": {"origins": "*"}})
+  
+database_url = os.environ.get('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/students_db')  
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@0.0.0.0:5432/postgres'
 db = SQLAlchemy(app)
 
 class Students(db.Model):
